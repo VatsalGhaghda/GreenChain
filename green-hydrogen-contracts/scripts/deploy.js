@@ -47,12 +47,16 @@ async function main() {
   console.log("📝 Next steps:");
   console.log("   1. Save the contract address above");
   console.log("   2. Run tests: npx hardhat test");
-  console.log("   3. Verify on Etherscan (if on testnet/mainnet)");
+  console.log("   3. Verify on Blockscout and Sourcify");
   
-  // If on Sepolia, provide Etherscan verification info
+  // If on Sepolia, provide verification info
   if (network.chainId === 11155111n) {
-    console.log("\n🔍 For Etherscan verification:");
+    console.log("\n🔍 For verification (Blockscout + Sourcify):");
     console.log("   npx hardhat verify --network sepolia", contractAddress);
+    console.log("\n🔗 View on Blockscout:");
+    console.log(`   https://eth-sepolia.blockscout.com/address/${contractAddress}#code`);
+    console.log("\n🔗 View on Sourcify:");
+    console.log(`   https://repo.sourcify.dev/contracts/full_match/11155111/${contractAddress}/`);
   }
   
   return contractAddress;

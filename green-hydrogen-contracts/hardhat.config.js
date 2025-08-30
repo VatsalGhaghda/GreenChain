@@ -41,6 +41,22 @@ module.exports = {
   sourcify: {
     enabled: true
   },
+  // Blockscout verification for Sepolia
+  etherscan: {
+    apiKey: {
+      sepolia: "abc123" // Blockscout doesn't require real API key
+    },
+    customChains: [
+      {
+        network: "sepolia",
+        chainId: 11155111,
+        urls: {
+          apiURL: "https://eth-sepolia.blockscout.com/api",
+          browserURL: "https://eth-sepolia.blockscout.com"
+        }
+      }
+    ]
+  },
   gasReporter: {
     enabled: process.env.REPORT_GAS !== undefined,
     currency: "USD",

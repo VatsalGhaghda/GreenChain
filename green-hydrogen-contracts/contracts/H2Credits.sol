@@ -10,6 +10,8 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
  * @dev Implements role-based access control for batch management
  */
 contract H2Credits is ERC1155, AccessControl {
+    // Version for tracking contract updates
+    string public constant VERSION = "2.0.0";
     // Role definitions
     bytes32 public constant PROPOSER_ROLE = keccak256("PROPOSER_ROLE");
     bytes32 public constant APPROVER_ROLE = keccak256("APPROVER_ROLE");
@@ -43,6 +45,10 @@ contract H2Credits is ERC1155, AccessControl {
     mapping(uint256 => Batch) public batches;
     mapping(uint256 => mapping(address => uint256)) public userCredits;
     mapping(uint256 => mapping(address => uint256)) public userRetiredCredits;
+    
+    // Fraud prevention mappings
+    mapping(bytes32 => bool) private issuedCreditHashes;
+    mapping(bytes32 => bool) private retirementHashes;
 
     // Events
     event BatchProposed(
@@ -87,6 +93,13 @@ contract H2Credits is ERC1155, AccessControl {
         address indexed owner,
         uint256 amount,
         string reason,
+        uint256 timestamp
+    );
+
+    event FraudAttemptDetected(
+        string indexed fraudType,
+        address indexed attacker,
+        bytes32 transactionHash,
         uint256 timestamp
     );
 
@@ -202,6 +215,18 @@ contract H2Credits is ERC1155, AccessControl {
             "Cannot issue more than approved credits"
         );
 
+        // Generate unique hash for this issue transaction
+        bytes32 issueHash = _generateIssueHash(batchId, recipient, amount);
+        
+        // Check for duplicate issue attempt
+        if (issuedCreditHashes[issueHash]) {
+            emit FraudAttemptDetected("DUPLICATE_ISSUE", msg.sender, issueHash, block.timestamp);
+            revert("Duplicate credit issue detected - fraud attempt");
+        }
+        
+        // Mark this hash as used
+        issuedCreditHashes[issueHash] = true;
+
         batch.issuedCredits += amount;
         userCredits[batchId][recipient] += amount;
 
@@ -261,6 +286,18 @@ contract H2Credits is ERC1155, AccessControl {
             "Insufficient credits"
         );
 
+        // Generate unique hash for this retirement transaction
+        bytes32 retirementHash = _generateRetirementHash(batchId, msg.sender, amount, reason);
+        
+        // Check for double retirement attempt
+        if (retirementHashes[retirementHash]) {
+            emit FraudAttemptDetected("DOUBLE_RETIREMENT", msg.sender, retirementHash, block.timestamp);
+            revert("Double retirement detected - fraud attempt");
+        }
+        
+        // Mark this hash as used
+        retirementHashes[retirementHash] = true;
+
         userCredits[batchId][msg.sender] -= amount;
         userRetiredCredits[batchId][msg.sender] += amount;
 
@@ -309,6 +346,29 @@ contract H2Credits is ERC1155, AccessControl {
     function getTotalBatches() external view returns (uint256) {
         return _batchIds;
     }
+
+    /**
+     * @dev Generate unique hash for issue transactions
+     */
+    function _generateIssueHash(
+    uint256 batchId,
+    address recipient,
+    uint256 amount
+) private pure returns (bytes32) {
+    return keccak256(abi.encodePacked(batchId, recipient, amount));
+}
+
+    /**
+     * @dev Generate unique hash for retirement transactions
+     */
+    function _generateRetirementHash(
+    uint256 batchId,
+    address user,
+    uint256 amount,
+    string memory reason
+) private pure returns (bytes32) {
+    return keccak256(abi.encodePacked(batchId, user, amount, reason));
+}
 
     /**
      * @dev Override required for AccessControl
