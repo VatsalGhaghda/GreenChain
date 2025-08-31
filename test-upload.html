@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test PDF Upload</title>
+</head>
+<body>
+    <h1>Test PDF Upload</h1>
+    <form id="uploadForm">
+        <input type="file" id="fileInput" accept=".pdf,.json,.txt" required>
+        <button type="submit">Upload File</button>
+    </form>
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('fileInput');
+            const resultDiv = document.getElementById('result');
+            
+            if (!fileInput.files[0]) {
+                resultDiv.innerHTML = '<p style="color: red;">Please select a file</p>';
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            
+            try {
+                resultDiv.innerHTML = '<p>Uploading...</p>';
+                
+                const response = await fetch('http://localhost:3001/api/ipfs/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <p style="color: green;">✅ Upload successful!</p>
+                        <p><strong>IPFS Hash:</strong> ${result.ipfsHash}</p>
+                        <p><strong>File Name:</strong> ${result.fileName}</p>
+                        <p><strong>File Size:</strong> ${result.fileSize} bytes</p>
+                        <p><strong>IPFS URL:</strong> <a href="${result.ipfsURL}" target="_blank">${result.ipfsURL}</a></p>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<p style="color: red;">❌ Upload failed: ${result.error}</p>`;
+                }
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<p style="color: red;">❌ Network error: ${error.message}</p>`;
+                console.error('Upload error:', error);
+            }
+        });
+    </script>
+</body>
+</html>

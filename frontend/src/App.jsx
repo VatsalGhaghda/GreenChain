@@ -1,27 +1,37 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
+import ErrorBoundary from './components/ErrorBoundary';
 import Dashboard from './pages/Dashboard';
+import IssueBatch from './pages/IssueBatch';
+import PendingApprovalsSimple from './pages/PendingApprovalsSimple';
+import TestPage from './pages/TestPage';
+import Marketplace from './pages/Marketplace';
+import MyBatches from './pages/MyBatches';
+import ApprovedBatches from './pages/ApprovedBatches';
+import Certificates from './pages/Certificates';
+import ComplianceOverview from './pages/ComplianceOverview';
+import AuditTrail from './pages/AuditTrail';
+import Portfolio from './pages/Portfolio';
+import RetireCredits from './pages/RetireCredits';
+import FraudDemo from './pages/FraudDemo';
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path='/' element={<Layout />}>
-          <Route index element={<Dashboard />} />
-          {/* Add placeholder routes for navigation */}
-          <Route path='issue-batch' element={<div className="p-6"><h1 className="text-2xl font-bold">Issue Batch</h1><p className="text-gray-600">This page will be implemented next.</p></div>} />
-          <Route path='my-batches' element={<div className="p-6"><h1 className="text-2xl font-bold">My Batches</h1><p className="text-gray-600">This page will be implemented next.</p></div>} />
-          <Route path='marketplace' element={<div className="p-6"><h1 className="text-2xl font-bold">Marketplace</h1><p className="text-gray-600">This page will be implemented next.</p></div>} />
-          <Route path='approvals' element={<div className="p-6"><h1 className="text-2xl font-bold">Pending Approvals</h1><p className="text-gray-600">This page will be implemented next.</p></div>} />
-          <Route path='approved-batches' element={<div className="p-6"><h1 className="text-2xl font-bold">Approved Batches</h1><p className="text-gray-600">This page will be implemented next.</p></div>} />
-          <Route path='certificates' element={<div className="p-6"><h1 className="text-2xl font-bold">Certificates</h1><p className="text-gray-600">This page will be implemented next.</p></div>} />
-          <Route path='compliance' element={<div className="p-6"><h1 className="text-2xl font-bold">Compliance Overview</h1><p className="text-gray-600">This page will be implemented next.</p></div>} />
-          <Route path='audit-trail' element={<div className="p-6"><h1 className="text-2xl font-bold">Audit Trail</h1><p className="text-gray-600">This page will be implemented next.</p></div>} />
-          <Route path='portfolio' element={<div className="p-6"><h1 className="text-2xl font-bold">My Portfolio</h1><p className="text-gray-600">This page will be implemented next.</p></div>} />
-          <Route path='retire' element={<div className="p-6"><h1 className="text-2xl font-bold">Retire Credits</h1><p className="text-gray-600">This page will be implemented next.</p></div>} />
-        </Route>
-      </Routes>
-    </Router>
+    <ErrorBoundary>
+      <Router>
+        <Routes>
+          <Route path="/test" element={<TestPage />} />
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Dashboard />} />
+            <Route path="pending-approvals" element={<ErrorBoundary><PendingApprovalsSimple /></ErrorBoundary>} />
+            <Route path="my-batches" element={<ErrorBoundary><MyBatches /></ErrorBoundary>} />
+            <Route path="marketplace" element={<ErrorBoundary><Marketplace /></ErrorBoundary>} />
+            <Route path="issue-batch" element={<ErrorBoundary><IssueBatch /></ErrorBoundary>} />
+            <Route path="fraud-demo" element={<ErrorBoundary><FraudDemo /></ErrorBoundary>} />
+          </Route>
+        </Routes>
+      </Router>
+    </ErrorBoundary>
   );
 }
 

@@ -13,12 +13,38 @@ const authRoutes = require('./api/auth');
 const batchRoutes = require('./api/batches');
 const metricsRoutes = require('./api/metrics');
 const eventRoutes = require('./api/events');
+const transferRoutes = require('./api/transfers');
+const marketplaceRoutes = require('./api/marketplace');
+const retirementRoutes = require('./api/retirement');
+const healthRoutes = require('./api/health');
+const fraudRoutes = require('./api/fraud');
+const ipfsRoutes = require('./api/ipfs');
+const performanceMonitor = require('./monitoring/performance');
 
 // Use API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/batches', batchRoutes);
 app.use('/api/metrics', metricsRoutes);
 app.use('/api/events', eventRoutes);
+app.use('/api/transfers', transferRoutes);
+app.use('/api/marketplace', marketplaceRoutes);
+app.use('/api/retirement', retirementRoutes);
+app.use('/api/health', healthRoutes);
+app.use('/api/fraud', fraudRoutes);
+app.use('/api/ipfs', ipfsRoutes);
+
+// Performance monitoring middleware
+app.use((req, res, next) => {
+  const start = Date.now();
+  
+  res.on('finish', () => {
+    const responseTime = Date.now() - start;
+    const success = res.statusCode < 400;
+    performanceMonitor.recordRequest(responseTime, success);
+  });
+  
+  next();
+});
 
 // Basic test route
 app.get('/test', (req, res) => {
