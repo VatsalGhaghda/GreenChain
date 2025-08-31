@@ -123,6 +123,35 @@ router.post('/approve/:batchId', async (req, res) => {
   }
 });
 
+// Reject batch
+router.post('/reject/:batchId', async (req, res) => {
+  try {
+    const { batchId } = req.params;
+    const { reason } = req.body || {};
+    
+    // Find and update batch status
+    const batchIndex = batches.findIndex(b => b.batch_id === batchId);
+    
+    if (batchIndex === -1) {
+      return res.status(404).json({ error: 'Batch not found' });
+    }
+    
+    batches[batchIndex].status = 'rejected';
+    batches[batchIndex].rejection_reason = reason || 'No reason provided';
+    batches[batchIndex].updated_at = new Date().toISOString();
+    
+    res.json({
+      success: true,
+      batch: batches[batchIndex],
+      message: 'Batch rejected successfully'
+    });
+    
+  } catch (error) {
+    console.error('Error rejecting batch:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Get batch by ID
 router.get('/:batchId', async (req, res) => {
   try {

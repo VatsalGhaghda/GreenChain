@@ -65,9 +65,16 @@ export default function PendingApprovalsSimple() {
 
   const handleReject = async (batchId) => {
     try {
-      setBatches(prev => prev.map(batch => 
-        batch.id === batchId ? { ...batch, status: 'rejected' } : batch
-      ));
+      const response = await fetch(`http://localhost:3001/api/batches/reject/${batchId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      if (response.ok) {
+        setBatches(prev => prev.map(batch => 
+          batch.id === batchId ? { ...batch, status: 'rejected' } : batch
+        ));
+      }
     } catch (error) {
       console.error('Error rejecting batch:', error);
     }
@@ -140,19 +147,27 @@ export default function PendingApprovalsSimple() {
                   </div>
                 </div>
                 
-                <div className="flex justify-end space-x-3 pt-4 border-t border-gray-100">
+                <div className="flex justify-between items-center pt-4 border-t border-gray-100">
                   <button
-                    onClick={() => handleReject(batch.id)}
-                    className="px-4 py-2 text-sm font-medium text-red-700 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 transition-colors"
+                    onClick={fetchPendingBatches}
+                    className="px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 transition-colors"
                   >
-                    Reject
+                    🔄 Refresh
                   </button>
-                  <button
-                    onClick={() => handleApprove(batch.id)}
-                    className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 transition-colors"
-                  >
-                    Approve
-                  </button>
+                  <div className="flex space-x-3">
+                    <button
+                      onClick={() => handleReject(batch.id)}
+                      className="px-4 py-2 text-sm font-medium text-red-700 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 transition-colors"
+                    >
+                      Reject
+                    </button>
+                    <button
+                      onClick={() => handleApprove(batch.id)}
+                      className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 transition-colors"
+                    >
+                      Approve
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

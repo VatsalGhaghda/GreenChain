@@ -154,7 +154,20 @@ export default function IssueBatch() {
         producer: '0x123456789abcdef' // In real app, get from connected wallet
       };
       
-      const result = await batchService.submitBatch(batchData);
+      // Direct API call since backend might not be running
+      const response = await fetch('http://localhost:3001/api/batches/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(batchData)
+      });
+      
+      if (!response.ok) {
+        throw new Error('Backend server not responding. Please start the backend server.');
+      }
+      
+      const result = await response.json();
       
       alert(`✅ Batch successfully submitted!\n\nBatch ID: ${result.batch.batch_id}\nStatus: ${result.batch.status}\nIPFS: ${result.ipfsCID}\n\nYour batch is now pending approval.`);
       
